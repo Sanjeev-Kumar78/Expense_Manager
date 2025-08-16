@@ -93,7 +93,7 @@ graph TB
 | **PDF Text Extraction** | PyMuPDF (Fitz)               | Text extraction from PDFs                    |
 | **Server**              | Uvicorn[standard] >=0.35.0   | ASGI server with auto-reload                 |
 
-## � Quick Start
+## Quick Start
 
 ### Prerequisites
 
