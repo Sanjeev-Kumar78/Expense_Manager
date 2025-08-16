@@ -22,47 +22,7 @@ A comprehensive expense tracking and management system with AI-powered features 
 
 ## 🏗️ Architecture
 
-```mermaid
-graph TB
-    subgraph "Frontend (Coming Soon)"
-        A[React App]
-        B[Dashboard]
-        C[Expense Forms]
-        D[Analytics Views]
-        E[Chat Interface]
-    end
-
-    subgraph "Backend Services"
-        F[FastAPI Server]
-        G[Authentication Service]
-        H[Expense Management]
-        I[AI Services]
-        J[Analytics Engine]
-    end
-
-    subgraph "External Services"
-        K[MongoDB Database]
-        L[Google AI API]
-        M[File Storage]
-    end
-
-    A --> F
-    B --> F
-    C --> F
-    D --> F
-    E --> F
-
-    F --> G
-    F --> H
-    F --> I
-    F --> J
-
-    G --> K
-    H --> K
-    I --> L
-    J --> K
-    I --> M
-```
+<img src="./architecture.svg" alt="Architecture diagram" style="width:100%;height:400px;" />
 
 ## 🚀 Quick Start
 
