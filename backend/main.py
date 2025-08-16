@@ -71,7 +71,7 @@ The system supports processing receipts in the following formats:
 - `COLLECTION_EXPENSES`: Expenses collection name
 - `COLLECTION_TRANSACTIONS`: Transactions collection name
 - `SECRET_KEY`: JWT secret key
-- `GOOGLE_API_KEY`: Google AI API key for receipt processing
+- `GEMINI_API_KEY`: Google AI API key for receipt processing
 """
 
 # Create FastAPI application

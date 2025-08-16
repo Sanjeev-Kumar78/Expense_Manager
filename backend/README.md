@@ -1,58 +1,138 @@
-# Expense Manager API - Complete Documentation
+# 🔧 Expense Manager Backend API
 
-## 🚀 Overview
+A powerful FastAPI-based backend for expense management with AI-powered features, comprehensive analytics, and intelligent financial insights.
 
-The Expense Manager API is a comprehensive expense tracking system with AI-powered receipt processing and financial insights. It provides user authentication, expense management, budget tracking, and an AI assistant for financial advice.
+## 🌟 Features
 
-## 🏗️ Architecture
+- **🔐 JWT Authentication** - Secure user registration and login with bcrypt password hashing
+- **💰 Expense Management** - Complete CRUD operations for expenses and transactions
+- **🤖 AI Receipt Processing** - Automatic extraction from images (PNG, JPG) and PDFs using Google AI
+- **📊 Financial Analytics** - Spending summaries, trends, and category-wise insights
+- **💬 AI Financial Assistant** - Chat-based financial advice using your actual spending data
+- **🔍 Smart Categorization** - Automatic expense categorization based on merchant and items
+- **📈 Budget Tracking** - Set and monitor spending limits with real-time alerts
+- **🔄 Real-time Updates** - Async operations for optimal performance
+- **📱 Mobile-Ready API** - RESTful endpoints designed for web and mobile frontends
 
+## 🏗️ Backend Architecture
+
+```mermaid
+graph TB
+    subgraph "API Layer"
+        A[FastAPI Main App]
+        B[CORS Middleware]
+        C[Exception Handlers]
+        D[Request Validation]
+    end
+
+    subgraph "Route Handlers"
+        E[Users Router]
+        F[Expenses Router]
+        G[Summary Router]
+    end
+
+    subgraph "Services Layer"
+        H[Chat Agent Service]
+        I[Preprocessor Service]
+        J[Authentication Service]
+        K[Analytics Service]
+    end
+
+    subgraph "Data Layer"
+        L[Database Utils]
+        M[MongoDB Driver PyMongo]
+        N[Connection Pool]
+    end
+
+    subgraph "External APIs"
+        O[Google AI API]
+        P[MongoDB Atlas]
+    end
+
+    A --> B
+    A --> C
+    A --> D
+    A --> E
+    A --> F
+    A --> G
+
+    E --> J
+    E --> L
+    F --> L
+    F --> I
+    G --> H
+    G --> K
+    G --> L
+
+    H --> O
+    I --> O
+
+    L --> M
+    M --> N
+    N --> P
+
+    style A fill:#e1f5fe
+    style H fill:#f3e5f5
+    style I fill:#f3e5f5
+    style O fill:#fff3e0
+    style P fill:#fff3e0
 ```
-backend/
-├── main.py                 # FastAPI application entry point
-├── requirements.txt        # Python dependencies
-├── .env.example           # Environment configuration template
-├── routes/
-│   ├── users.py           # User authentication and management
-│   ├── expense_transactions.py # Expense and transaction management
-│   └── summary.py         # Analytics and AI chat endpoints
-├── services/
-│   ├── chat_agent.py      # AI financial assistant
-│   └── preprocessor.py    # Receipt processing with AI
-└── utils/
-    ├── db.py              # Database operations
-    └── __init__.py        # Package initialization
-```
 
-## 🛠️ Setup and Installation
+## ️ Technology Stack
+
+| Category                | Technology                   | Purpose                                      |
+| ----------------------- | ---------------------------- | -------------------------------------------- |
+| **Web Framework**       | FastAPI >=0.116.1            | High-performance async web framework         |
+| **Database**            | MongoDB                      | NoSQL database for flexible document storage |
+| **Database Driver**     | PyMongo >=4.14.0             | MongoDB operations and connectivity          |
+| **AI Processing**       | Google Generative AI >=0.8.5 | Receipt processing and chat assistant        |
+| **Authentication**      | Python-JOSE >=3.5.0          | JWT token handling                           |
+| **Password Security**   | PassLib[bcrypt] >=1.7.4      | Secure password hashing                      |
+| **Data Validation**     | Pydantic >=2.11.7            | Request/response validation                  |
+| **File Processing**     | PDF2Image >=1.17.0           | PDF to image conversion                      |
+| **PDF Text Extraction** | PyMuPDF (Fitz)               | Text extraction from PDFs                    |
+| **Server**              | Uvicorn[standard] >=0.35.0   | ASGI server with auto-reload                 |
+
+## � Quick Start
 
 ### Prerequisites
 
-- Python 3.8+
-- MongoDB (local or MongoDB Atlas)
-- Google AI API key (for receipt processing)
+- **Python 3.12+** (recommended for best performance)
+- **MongoDB** (local installation or MongoDB Atlas cloud)
+- **Google AI API key** (for AI receipt processing and chat features)
 
 ### 1. Environment Setup
 
 ```bash
-# Clone and navigate to the project
+# Navigate to backend directory
 cd backend
 
 # Create virtual environment
 python -m venv .venv
 
 # Activate virtual environment
-# Windows
-.venv\Scripts\activate
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
+# Windows CMD
+.venv\Scripts\activate.bat
 # macOS/Linux
 source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
 ```
 
-### 2. Environment Configuration
+### 2. Install Dependencies
 
-Copy `.env.example` to `.env` and configure:
+```bash
+# Install all required packages
+pip install -r requirements.txt
+
+# Alternative: Using uv (faster package manager)
+pip install uv
+uv pip install -r requirements.txt
+```
+
+### 3. Environment Configuration
+
+Create a `.env` file in the backend directory with the following configuration:
 
 ```env
 # Database Configuration
@@ -62,13 +142,13 @@ COLLECTION_USERS=users
 COLLECTION_EXPENSES=expenses
 COLLECTION_TRANSACTIONS=transactions
 
-# JWT Security
+# JWT Security (IMPORTANT: Change in production!)
 SECRET_KEY=your-super-secret-jwt-key-change-in-production-minimum-32-characters
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 
-# Google AI (for receipt processing)
-GOOGLE_API_KEY=your-google-ai-api-key-here
+# Google AI (Required for AI features)
+GEMINI_API_KEY=your-google-ai-api-key-here
 
 # Server Configuration
 HOST=127.0.0.1
@@ -76,32 +156,67 @@ PORT=8000
 DEBUG=true
 ```
 
-### 3. Database Setup
+### 4. Database Setup
 
 MongoDB collections will be created automatically with proper indexes when you first run the application.
 
-**Required Collections:**
+**Collections Created:**
 
 - `users` - User accounts and profiles
 - `expenses` - Individual expense records
 - `transactions` - Transaction history and details
 
-### 4. Running the Application
+### 5. Run the Application
 
 ```bash
 # Development server with auto-reload
 python main.py
 
-# Or using uvicorn directly
+# Alternative: Using uvicorn directly
 uvicorn main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The API will be available at:
+**🎉 Success!** The API will be available at:
 
 - **API Server**: http://127.0.0.1:8000
 - **Interactive Docs**: http://127.0.0.1:8000/docs
 - **ReDoc Documentation**: http://127.0.0.1:8000/redoc
 - **Health Check**: http://127.0.0.1:8000/health
+
+## 📡 API Endpoints Overview
+
+### 🔐 Authentication (`/users`)
+
+| Method | Endpoint          | Description         | Auth Required |
+| ------ | ----------------- | ------------------- | ------------- |
+| POST   | `/users/register` | Register new user   | ❌            |
+| POST   | `/users/login`    | User login          | ❌            |
+| GET    | `/users/me`       | Get user profile    | ✅            |
+| PUT    | `/users/budget`   | Set/update budget   | ✅            |
+| DELETE | `/users/me`       | Delete user account | ✅            |
+
+### 💰 Expenses (`/expenses`)
+
+| Method | Endpoint                 | Description                      | Auth Required |
+| ------ | ------------------------ | -------------------------------- | ------------- |
+| GET    | `/expenses/`             | List user expenses               | ✅            |
+| POST   | `/expenses/`             | Create new expense               | ✅            |
+| POST   | `/expenses/upload`       | Upload receipt for AI processing | ✅            |
+| GET    | `/expenses/transactions` | Get user transactions            | ✅            |
+| POST   | `/expenses/transactions` | Create manual transaction        | ✅            |
+| DELETE | `/expenses/{id}`         | Delete expense                   | ✅            |
+
+### 📊 Analytics & AI (`/summary`)
+
+| Method | Endpoint              | Description             | Auth Required |
+| ------ | --------------------- | ----------------------- | ------------- |
+| GET    | `/summary/dashboard`  | Complete dashboard data | ✅            |
+| GET    | `/summary/spending`   | Spending summary        | ✅            |
+| GET    | `/summary/categories` | Category breakdown      | ✅            |
+| GET    | `/summary/trends`     | Monthly spending trends | ✅            |
+| GET    | `/summary/recent`     | Recent transactions     | ✅            |
+| POST   | `/summary/chat`       | Chat with AI assistant  | ✅            |
+| DELETE | `/summary/chat`       | Clear chat history      | ✅            |
 
 ## 📖 API Endpoints
 
@@ -445,67 +560,137 @@ with open("receipt.jpg", "rb") as f:
 print(response.json())
 ```
 
-## 🚀 Deployment
+## 🚀 Production Deployment
 
-### Production Configuration
+### Environment Configuration
 
-1. **Environment Variables:**
+```env
+# Production Environment Variables
+DEBUG=false
+SECRET_KEY=your-production-secret-key-at-least-32-characters-long-and-random
+DATABASE_URL=mongodb+srv://user:password@cluster.mongodb.net/expense_manager
+GEMINI_API_KEY=your-production-google-ai-api-key
+HOST=0.0.0.0
+PORT=8000
 
-   ```env
-   DEBUG=false
-   SECRET_KEY=<strong-production-secret>
-   DATABASE_URL=<production-mongodb-url>
-   HOST=0.0.0.0
-   PORT=8000
-   ```
+# Security Settings
+ACCESS_TOKEN_EXPIRE_MINUTES=60
+ALGORITHM=HS256
+```
 
-2. **CORS Configuration:**
-   Update allowed origins in `main.py` for your frontend domain.
+### Production Checklist
 
-3. **Database:**
-   Use MongoDB Atlas or a dedicated MongoDB server.
+1. **🔒 Security**
 
-4. **Security:**
-   - Use HTTPS in production
+   - Generate a strong SECRET_KEY (minimum 32 characters)
+   - Use MongoDB with authentication enabled
+   - Enable HTTPS with SSL certificates
+   - Configure proper CORS origins
    - Implement rate limiting
-   - Set up proper CORS policies
 
-### Docker Deployment
+2. **🗄️ Database**
+
+   - Use MongoDB Atlas or dedicated MongoDB server
+   - Set up database backups
+   - Configure connection pooling
+   - Enable database authentication
+
+3. **📊 Monitoring**
+
+   - Set up application logging
+   - Configure health check monitoring
+   - Implement error tracking
+   - Monitor API performance metrics
+
+4. **🔧 Infrastructure**
+   - Use reverse proxy (nginx recommended)
+   - Configure load balancing if needed
+   - Set up CI/CD pipeline
+   - Configure automated deployments
+
+### Docker Production Deployment
 
 ```dockerfile
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
 
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
 COPY . .
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app
+USER app
+
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]
 ```
 
-To build and run the backend in Docker (map container port 8000 to host):
+### Environment Variables Checklist
 
-```powershell
-docker build -t expense_backend .
-docker run -d -p 8000:8000 --name expense_backend expense_backend
+**Required:**
+
+- ✅ `SECRET_KEY` - JWT secret key (minimum 32 characters)
+- ✅ `GEMINI_API_KEY` - Google AI API key for receipt processing
+- ✅ `DATABASE_URL` - MongoDB connection string
+
+**Optional:**
+
+- `DATABASE_NAME` (default: expense_manager)
+- `HOST` (default: 127.0.0.1)
+- `PORT` (default: 8000)
+- `DEBUG` (default: true)
+- `ACCESS_TOKEN_EXPIRE_MINUTES` (default: 30)
+
+## 🐳 Docker Support
+
+Build and run with Docker:
+
+```bash
+# Build the image
+docker build -t expense-manager-backend .
+
+# Run the container
+docker run -p 8000:8000 --env-file .env expense-manager-backend
+
+# Or using docker-compose (if docker-compose.yml exists)
+docker-compose up --build
 ```
 
-Access the backend on `http://localhost:8000`.
-Make sure the environment variables in `.env` are set. You can copy the provided `.env.example` and edit it.
+## 📊 Performance & Monitoring
 
-Quick checklist of required environment variables (from `.env.example`):
+- **⚡ Async Operations**: All database operations use async/await for non-blocking I/O
+- **🔄 Connection Pooling**: MongoDB connection pooling with PyMongo for optimal performance
+- **✅ Request Validation**: Pydantic models ensure data integrity and prevent malformed requests
+- **🛡️ Error Handling**: Comprehensive exception handling with proper HTTP status codes
+- **🌐 CORS Support**: Configured for secure frontend integration
+- **📈 Health Monitoring**: Built-in health check endpoint for monitoring
 
-- DATABASE_URL (optional if using local default)
-- DATABASE_NAME
-- COLLECTION_USERS
-- COLLECTION_EXPENSES
-- COLLECTION_TRANSACTIONS
-- SECRET_KEY
-- GOOGLE_API_KEY (required for receipt processing)
-- HOST (optional)
-- PORT (optional)
+## 🔒 Security Features
+
+### Authentication & Authorization
+
+- **🔐 JWT Authentication**: Secure token-based authentication with configurable expiration
+- **🔒 Password Security**: bcrypt hashing with salt for secure password storage
+- **🎫 Token Validation**: Automatic token validation on all protected endpoints
+- **⏰ Session Management**: Configurable token expiration times
+
+### Data Protection
+
+- **✅ Input Validation**: Pydantic models prevent injection attacks and ensure data integrity
+- **🛡️ NoSQL Security**: MongoDB with proper query structure prevents injection
+- **🚫 Error Sanitization**: Error responses don't expose sensitive system information
+- **🌐 CORS Configuration**: Controlled cross-origin requests for web security
 
 ## 🐛 Troubleshooting
 
@@ -514,12 +699,12 @@ Quick checklist of required environment variables (from `.env.example`):
 1. **Database Connection Failed:**
 
    - Check MongoDB is running
-   - Verify DATABASE_URL in .env
+   - Verify `DATABASE_URL` in .env
    - Ensure database name exists
 
 2. **Authentication Errors:**
 
-   - Verify SECRET_KEY is set
+   - Verify `SECRET_KEY` is set
    - Check token expiration
    - Ensure proper Authorization header format
 
@@ -527,10 +712,10 @@ Quick checklist of required environment variables (from `.env.example`):
 
    - Check file size limits
    - Verify supported file types
-   - Ensure Google AI API key is valid
+   - Ensure Gemini AI API key is valid
 
 4. **AI Processing Errors:**
-   - Verify GOOGLE_API_KEY is set correctly
+   - Verify `GEMINI_API_KEY` is set correctly
    - Check API quota limits
    - Ensure file is readable
 
@@ -550,17 +735,94 @@ Returns database status, environment configuration, and overall health.
 - **Alternative Documentation**: `/redoc` (ReDoc)
 - **OpenAPI Specification**: `/openapi.json`
 
-## 🤝 Support
+## 🤝 Contributing
 
-For issues and questions:
+We welcome contributions! Here's how to get started:
 
-1. Check the health endpoint: `/health`
-2. Review logs for error details
-3. Verify environment configuration
-4. Check database connectivity
+### Development Setup
 
-The API provides detailed error messages with timestamps and request paths for debugging.
+1. **Fork the repository** and clone your fork
+2. **Create a feature branch**: `git checkout -b feature/amazing-feature`
+3. **Set up development environment** following the Quick Start guide
+4. **Make your changes** with clear, descriptive commits
+5. **Update documentation** if needed
+6. **Submit a pull request** with a clear description
+
+## 🆘 Support & Troubleshooting
+
+### Common Issues
+
+1. **🔌 Database Connection Failed**
+
+   ```bash
+   # Check MongoDB status
+   # Windows
+   net start MongoDB
+   # macOS
+   brew services start mongodb-community
+   # Linux
+   sudo systemctl start mongod
+   ```
+
+2. **🔑 Authentication Errors**
+
+   - Verify `SECRET_KEY` is set in `.env`
+   - Check token hasn't expired
+   - Ensure Authorization header format: `Bearer <token>`
+
+3. **📁 File Upload Issues**
+
+   - Verify Google AI API key is valid
+   - Check file size limits (default: 10MB)
+   - Ensure supported file types: PNG, JPG, PDF
+
+4. **🤖 AI Processing Errors**
+   - Confirm `GEMINI_API_KEY` is correctly set
+   - Check API quota limits in Google Cloud Console
+   - Verify internet connectivity
+
+### Getting Help
+
+1. **📚 Check Documentation**: Review API docs at `/docs`
+2. **🔍 Search Issues**: Look through existing [GitHub issues](https://github.com/Sanjeev-Kumar78/Expense_Manager/issues)
+3. **💬 Ask Questions**: Create a new issue with the `question` label
+4. **🐛 Report Bugs**: Use the bug report template
+5. **💡 Feature Requests**: Submit enhancement requests
+
+### Health Check
+
+Monitor application status:
+
+```http
+GET /health
+```
+
+Returns:
+
+- Database connectivity status
+- API version information
+- Environment configuration (non-sensitive)
+- Service uptime
+
+## 📚 Additional Resources
+
+### API Documentation
+
+- **📖 Interactive Docs**: http://localhost:8000/docs (Swagger UI)
+- **📋 Alternative Docs**: http://localhost:8000/redoc (ReDoc)
+- **⚙️ OpenAPI Schema**: http://localhost:8000/openapi.json
+
+### Related Documentation
+
+- **🏠 Main Project**: [../README.md](../README.md)
+- **🖥️ Frontend**: [../frontend/README.md](../frontend/README.md) (Coming Soon)
+- **📝 API Examples**: Check `/docs` for interactive examples
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 
 ---
 
-**Expense Manager API v1.0.0** - Complete expense management with AI-powered insights
+**🔧 Expense Manager Backend API v1.0.0**  
+Built with ❤️ using FastAPI, MongoDB, and Google AI
