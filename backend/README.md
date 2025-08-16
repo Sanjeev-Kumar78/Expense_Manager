@@ -568,7 +568,7 @@ print(response.json())
 # Production Environment Variables
 DEBUG=false
 SECRET_KEY=your-production-secret-key-at-least-32-characters-long-and-random
-DATABASE_URL=mongodb+srv://user:password@cluster.mongodb.net/expense_manager
+DATABASE_URL=MongoDB_ATLAS
 GEMINI_API_KEY=your-production-google-ai-api-key
 HOST=0.0.0.0
 PORT=8000
