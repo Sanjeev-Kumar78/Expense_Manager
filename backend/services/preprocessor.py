@@ -6,7 +6,7 @@ from pdf2image import convert_from_path
 import json
 dotenv.load_dotenv()
 genai.configure(
-    api_key=os.getenv("GOOGLE_API_KEY")
+    api_key=os.getenv("GEMINI_API_KEY")
 )
 # This model is multimodal and can handle images and text.
 VISION_MODEL = "models/gemini-1.5-pro-latest"

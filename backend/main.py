@@ -143,9 +143,8 @@ app.include_router(users_router)
 app.include_router(expenses_router)
 app.include_router(summary_router)
 
+
 # Root endpoint
-
-
 @app.get("/", tags=["Root"])
 async def root():
     """Welcome endpoint with API information."""
@@ -162,9 +161,8 @@ async def root():
         }
     }
 
+
 # Health check endpoint
-
-
 @app.get("/health", tags=["Health"])
 async def health_check():
     """Health check endpoint for monitoring."""
@@ -200,9 +198,8 @@ async def health_check():
         "uptime": "Service is running"
     }
 
+
 # API Information endpoint
-
-
 @app.get("/info", tags=["Information"])
 async def api_info():
     """Get detailed API information and statistics."""

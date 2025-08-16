@@ -2,22 +2,21 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
+from bson import ObjectId
 from routes.users import get_current_user
 from utils.db import (
     get_all_transactions,
     get_spending_summary,
     get_categories,
-    get_collection_transactions,
-    get_user_by_id
+    get_collection_transactions
 )
-from services.chat_agent import support_agent, clear_conversation
+from services.chat_agent import support_agent
 
 # Router setup
 router = APIRouter(prefix="/summary", tags=["summary"])
 
+
 # Pydantic models
-
-
 class SpendingSummary(BaseModel):
     total_spent: float
     budget: float
@@ -86,7 +85,6 @@ def get_monthly_spending_trends(user_id: str, months: int = 6) -> List[MonthlySp
     start_date = end_date - timedelta(days=months * 30)
 
     # Aggregation pipeline for monthly trends
-    from bson import ObjectId
     try:
         user_query_id = ObjectId(user_id) if len(user_id) == 24 else user_id
     except:
@@ -298,9 +296,23 @@ async def chat_with_ai(
     user_id = str(current_user["_id"])
 
     try:
-        # Get AI response using the chat agent (synchronous generator)
+        # Prepare comprehensive user context for AI
+        user_context = {
+            "user_id": user_id,
+            "username": current_user["username"],
+            "email": current_user["email"],
+            "budget": current_user.get("budget", 0.0),
+            "total_spent": current_user.get("total_spent", 0.0),
+            "remaining_budget": max(0, current_user.get("budget", 0.0) - current_user.get("total_spent", 0.0)),
+            "budget_utilization": (current_user.get("total_spent", 0.0) / current_user.get("budget", 1.0) * 100) if current_user.get("budget", 0.0) > 0 else 0,
+            "recent_transactions": get_recent_transactions_summary(user_id, 10),
+            "top_categories": get_top_categories(user_id, 5),
+            "monthly_trends": get_monthly_spending_trends(user_id, 3)
+        }
+
+        # Get AI response using the chat agent with enhanced context
         response_chunks = []
-        for chunk in support_agent(message.message, user_id):
+        for chunk in support_agent(message.message, user_context):
             response_chunks.append(chunk)
 
         full_response = "".join(response_chunks)
@@ -319,12 +331,5 @@ async def chat_with_ai(
 
 @router.delete("/chat")
 async def clear_chat_history(current_user: dict = Depends(get_current_user)):
-    """Clear chat conversation history."""
-    try:
-        clear_conversation()
-        return {"message": "Chat history cleared successfully"}
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error clearing chat history: {str(e)}"
-        )
+    """Clear chat conversation history (deprecated - conversations are now stateless)."""
+    return {"message": "Chat conversations are now stateless - no history to clear"}

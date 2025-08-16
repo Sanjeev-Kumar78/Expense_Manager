@@ -485,6 +485,28 @@ EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
+To build and run the backend in Docker (map container port 8000 to host):
+
+```powershell
+docker build -t expense_backend .
+docker run -d -p 8000:8000 --name expense_backend expense_backend
+```
+
+Access the backend on `http://localhost:8000`.
+Make sure the environment variables in `.env` are set. You can copy the provided `.env.example` and edit it.
+
+Quick checklist of required environment variables (from `.env.example`):
+
+- DATABASE_URL (optional if using local default)
+- DATABASE_NAME
+- COLLECTION_USERS
+- COLLECTION_EXPENSES
+- COLLECTION_TRANSACTIONS
+- SECRET_KEY
+- GOOGLE_API_KEY (required for receipt processing)
+- HOST (optional)
+- PORT (optional)
+
 ## 🐛 Troubleshooting
 
 ### Common Issues

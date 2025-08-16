@@ -18,9 +18,8 @@ from services.preprocessor import process_receipt
 # Router setup
 router = APIRouter(prefix="/expenses", tags=["expenses"])
 
+
 # Pydantic models
-
-
 class ExpenseCreate(BaseModel):
     title: str
     category: str
@@ -54,9 +53,8 @@ class TransactionResponse(BaseModel):
     description: str
     created_at: datetime
 
+
 # Utility functions
-
-
 def convert_expense_to_response(expense_doc: dict) -> ExpenseResponse:
     """Convert MongoDB expense document to ExpenseResponse model."""
     return ExpenseResponse(
@@ -82,9 +80,8 @@ def convert_transaction_to_response(transaction_doc: dict) -> TransactionRespons
         created_at=transaction_doc["created_at"]
     )
 
+
 # Routes
-
-
 @router.post("/", response_model=ExpenseResponse, status_code=status.HTTP_201_CREATED)
 async def create_expense(
     expense: ExpenseCreate,

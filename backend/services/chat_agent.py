@@ -5,12 +5,9 @@ from utils.db import get_all_transactions, get_spending_summary, get_categories
 
 dotenv.load_dotenv()
 genai.configure(
-    api_key=os.getenv("GOOGLE_API_KEY"),
+    api_key=os.getenv("GEMINI_API_KEY"),
     transport="grpc"
 )
-
-# Store conversation history
-conversation_history = []
 
 
 def get_user_financial_data(user_id: str = None):
@@ -51,49 +48,86 @@ def get_user_financial_data(user_id: str = None):
         }
 
 
-def support_agent(user_message: str, user_id: str = None):
+def support_agent(user_message: str, user_context: dict = None):
     """
     Handles user messages and provides streaming responses using the generative AI model.
-    Maintains conversation context and uses user's financial data for better assistance.
+    Uses user's financial data for better assistance. Each request is stateless.
 
     Args:
         user_message: The message from the user.
-        user_id: The user's ID for fetching personalized data.
+        user_context: Complete user context including budget, transactions, and spending data.
 
     Yields:
         Chunks of the response from the AI model.
     """
-    global conversation_history
 
-    # Fetch user's financial data
-    financial_data = get_user_financial_data(user_id)
+    # Use provided context or fetch basic data if only user_id provided
+    if isinstance(user_context, str):
+        # Backward compatibility: if user_context is just user_id
+        user_id = user_context
+        financial_data = get_user_financial_data(user_id)
+        user_context = {
+            "user_id": user_id,
+            "transactions": financial_data.get("transactions", []),
+            "spending_summary": financial_data.get("spending_summary", {}),
+            "categories": financial_data.get("categories", []),
+            "total_transactions": financial_data.get("total_transactions", 0)
+        }
+    elif user_context is None:
+        user_context = {
+            "user_id": "unknown",
+            "transactions": [],
+            "spending_summary": {},
+            "categories": [],
+            "total_transactions": 0
+        }
 
-    # Create context-aware system prompt
+    # Create enhanced context-aware system prompt
+    budget_info = ""
+    if user_context.get("budget") and user_context.get("total_spent") is not None:
+        budget_info = f"""
+    Budget Information:
+    - Budget: ${user_context.get("budget", 0):.2f}
+    - Total Spent: ${user_context.get("total_spent", 0):.2f}
+    - Remaining Budget: ${user_context.get("remaining_budget", 0):.2f}
+    - Budget Utilization: {user_context.get("budget_utilization", 0):.1f}%
+    """
+
+    recent_transactions_info = ""
+    if user_context.get("recent_transactions"):
+        recent_transactions_info = f"""
+    Recent Transactions ({len(user_context['recent_transactions'])} items):
+    """ + "\n    ".join([f"- {t.category}: ${t.amount:.2f} ({t.description})" for t in user_context['recent_transactions'][:5]])
+
+    top_categories_info = ""
+    if user_context.get("top_categories"):
+        top_categories_info = f"""
+    Top Spending Categories:
+    """ + "\n    ".join([f"- {c.category}: ${c.total_amount:.2f} ({c.percentage_of_total:.1f}%)" for c in user_context['top_categories'][:3]])
+
     system_prompt = f"""
     You are a helpful financial assistant for an expense management application.
     
     User's Financial Context:
-    - Total Transactions: {financial_data['total_transactions']}
-    - Available Categories: {', '.join([cat.get('name', '') for cat in financial_data['categories']])}
-    - Recent Spending Summary: {financial_data['spending_summary']}
+    - User ID: {user_context.get('user_id', 'unknown')}
+    - Username: {user_context.get('username', 'User')}
+    {budget_info}
+    - Total Transactions: {user_context.get('total_transactions', len(user_context.get('transactions', [])))}
+    - Available Categories: {', '.join([cat.get('name', '') for cat in user_context.get('categories', [])])}
+    {recent_transactions_info}
+    {top_categories_info}
     
     Help the user with their expense management questions, provide insights about their spending,
-    and assist with financial planning based on their transaction history.
+    and assist with financial planning based on their transaction history and budget information.
+    Be specific with dollar amounts and percentages when providing advice.
+    
+    User Question: {user_message}
     """
-
-    # Add system context if this is the start of conversation
-    if not conversation_history:
-        conversation_history.append({"role": "user", "parts": [system_prompt]})
-
-    # Add user message to history
-    conversation_history.append({"role": "user", "parts": [user_message]})
 
     model = genai.GenerativeModel("models/gemini-2.5-flash")
 
-    # Use conversation history for context
-    response = model.generate_content(conversation_history, stream=True)
-
-    assistant_response = ""
+    # Generate response without maintaining conversation history
+    response = model.generate_content(system_prompt, stream=True)
 
     for chunk in response:
         if chunk.text:
@@ -101,16 +135,4 @@ def support_agent(user_message: str, user_id: str = None):
 
             if chunk_text:
                 cleaned_chunk = chunk_text.replace('*', '')
-                assistant_response += cleaned_chunk
                 yield cleaned_chunk
-
-    # Add assistant response to history
-    if assistant_response:
-        conversation_history.append(
-            {"role": "model", "parts": [assistant_response]})
-
-
-def clear_conversation():
-    """Clear the conversation history."""
-    global conversation_history
-    conversation_history = []
