@@ -9,8 +9,6 @@ COPY uv.lock .
 RUN pip install --upgrade pip && \
 	pip install --no-cache-dir -r requirements.txt
 
-# Copy environment file
-COPY .env .env
  # Expose application port
 EXPOSE 8000
 COPY . .
