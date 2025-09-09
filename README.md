@@ -4,13 +4,13 @@ A comprehensive expense tracking and management system with AI-powered features 
 
 ## 🌟 Features
 
-- **📱 Frontend** (Coming Soon)
-
-  - Modern, responsive web interface
-  - Real-time expense tracking
+- **📱 Frontend**
+  - Modern, responsive React application with TypeScript
+  - Beautiful green/black themed UI using shadcn/ui components
   - Interactive dashboard with charts and analytics
-  - Mobile-friendly design
-  - Receipt image upload with preview
+  - Mobile-friendly design with collapsible sidebar
+  - Protected routes with JWT authentication
+  - Real-time expense tracking and visualization
 
 - **🔧 Backend**
   - RESTful API built with FastAPI
@@ -80,9 +80,32 @@ A comprehensive expense tracking and management system with AI-powered features 
 
 The API will be available at `http://localhost:8000`
 
-### Frontend Setup (Coming Soon)
+### Frontend Setup
 
-The frontend application is currently in development. Stay tuned for updates!
+1. **Navigate to frontend directory**
+
+   ```bash
+   cd frontend
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+
+   ```bash
+   echo "REACT_APP_API_URL=http://localhost:8000" > .env
+   ```
+
+4. **Start the development server**
+   ```bash
+   npm start
+   ```
+
+The frontend will be available at `http://localhost:3000`
 
 ## 📁 Project Structure
 
@@ -103,8 +126,13 @@ Expense_Manager/
 │   │   └── preprocessor.py  # Receipt processing with AI
 │   └── utils/               # Utilities
 │       └── db.py            # Database operations
-└── frontend/                # Frontend application (Coming Soon)
+└── frontend/                # Frontend application
     ├── src/                 # Source code
+    │   ├── components/      # Reusable UI components
+    │   ├── pages/          # Page components
+    │   ├── contexts/       # React contexts
+    │   ├── utils/          # Utility functions
+    │   └── types/          # TypeScript types
     ├── public/              # Static assets
     └── package.json         # Node.js dependencies
 ```
@@ -162,11 +190,13 @@ The backend provides a comprehensive RESTful API with the following main endpoin
 - **bcrypt** - Password hashing
 - **Motor** - Async MongoDB driver
 
-### Frontend (Planned)
+### Frontend (Completed ✅)
 
-- **React/Vue.js** - Modern frontend framework
-- **Chart.js/D3.js** - Data visualization
+- **React/TypeScript** - Modern frontend framework with type safety
+- **shadcn/ui** - High-quality, accessible component library
 - **Tailwind CSS** - Utility-first CSS framework
+- **Recharts** - Beautiful, responsive data visualization
+- **React Router** - Client-side routing with protection
 - **Axios** - HTTP client for API communication
 
 ## 🐳 Docker Support
@@ -212,13 +242,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - ✅ Financial analytics
 - ✅ AI chat assistant
 
-### Phase 2: Frontend (In Progress)
+### Phase 2: Frontend (Completed ✅)
 
-- 📱 Responsive web interface
-- 📊 Interactive dashboards
-- 📈 Real-time charts and analytics
-- 💬 AI chat interface
-- 📸 Receipt upload with preview
+- ✅ Responsive web interface with green/black theme
+- ✅ Interactive dashboards with charts and analytics
+- ✅ Real-time expense visualization
+- ✅ Protected routes with JWT authentication
+- ✅ Mobile-responsive design
+- ✅ Modern React with TypeScript
 
 ### Phase 3: Advanced Features (Planned)
 
