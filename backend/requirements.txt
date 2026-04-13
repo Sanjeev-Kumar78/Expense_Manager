@@ -26,7 +26,7 @@ pdf2image==1.16.3
 PyMuPDF==1.23.8
 
 # Development
-pytest==7.4.3
+pytest==9.0.3
 pytest-asyncio==0.23.2
 httpx==0.25.2
 
